@@ -37,7 +37,7 @@ def add_to_list(input, n):
 
 
 def test_add_to_list(input):
-    test.append(input)
+    testlist.append(input)
 
 
 # Initialize serial monitor port.
@@ -51,14 +51,16 @@ n = 3  # Can change this value to desired precision as required.
 # Lists containing data collected from serial monitor, to be formatted into .csv.
 velocity = []
 voltage = []
-test = []
+testlist = []
 
 sleep(3)
 ser.write('b'.encode('utf-8'))
 sleep(0.5)
 
 while poll:
-    if ser.readline() == "start":
+    line = ser.readline()
+    #print(line)
+    if line == b'Start\r\n':
         poll = False
         test = True
     else:
@@ -67,14 +69,14 @@ while poll:
 
 while test:
     input_line = ser.readline()  # Read the newest output from the Arduino
-    if input_line == "done":
+    if input_line == b'done\r\n':
         test = False
     else:
         test_add_to_list(input_line)
     sleep(.1)  # Delay for one tenth of a second
 
-for i in test:
-    print(test[i])
+for i in testlist:
+    print(i.decode('utf-8'))
 
 
 # File upload below.
