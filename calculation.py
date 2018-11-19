@@ -5,3 +5,6 @@ def distance(velocity, T):
         distance = distance + velocity(i)*T;
     return distance
 
+def average(input_list):
+    return sum(input_list)/len(input_list)
+
