@@ -9,24 +9,11 @@
 from google.cloud import storage
 import datetime
 from time import sleep
-from calculation  import *
+from calculation import *
+from user_input import *
 import serial
 
-# Function implementation for uploading file.
-def upload_csv(bucket_name, source_file_name, destination_file_name):
-    """Uploads a file to the bucket."""
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(destination_file_name)
-
-    blob.upload_from_filename(source_file_name)
-
-    print('File {} uploaded to {}.'.format(
-        source_file_name,
-        destination_file_name))
-
 # BELOW ARE FUNCTIONS FOR DATA COLLECTION FROM ARDUINO.
-
 
 def add_to_list(input, n):
     # input is string of digits, n is desired precision for data.
@@ -41,7 +28,7 @@ def test_add_to_list(input):
 #Function to run a test, returns list to be made into a CSV file:
 # [Amount of Chemical, Distance, Average Velocity, Average Voltage]
 # Note Arduino has to be running in a loop awaiting start signal
-def run_test(chemical_amount):
+def collect_data(chemical_amount):
     # Initialize serial monitor port.
     ser = serial.Serial('/dev/cu.usbmodem14201', 9600) # Establish the connection on a specific port
 
@@ -76,11 +63,24 @@ def run_test(chemical_amount):
             #ADD CODE TO APPEND TO VELOCITY AND VOLTAGE
         sleep(.5)  # Delay for half of a second
 
+
+    if prompt_decision("Visualize data?"):
+        print("Plotting Velocity and Voltage")
+        linear_timeplot("velocity", velocity, period)
+        linear_timeplot("voltage", voltage, period)
+
     distance_travelled = distance(velocity, period)
     average_volatage = average(voltage)
     average_velocity = average(velocity)
 
-    return([chemical_amount, distance_travelled, average_velocity, average_volatage])
+    test_output = {"velocity": velocity,
+                    "voltage": voltage,
+                    "summary": [chemical_amount, distance_travelled, average_velocity, average_volatage]
+                   }
+
+    return(test_output)
+
+
 
 
 # Initialize serial monitor port.
