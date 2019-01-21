@@ -1,3 +1,5 @@
+from google.cloud import storage
+
 # Function implementation for uploading file.
 def upload_csv(bucket_name, source_file_name, destination_file_name):
     """Uploads a file to the bucket."""

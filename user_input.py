@@ -49,6 +49,3 @@ def prompt_choice(question, list):
 
         print("\nUnrecognized input \"" + decision + "\"\n")
 
-
-list = ["A", "faggot", "C", "D"]
-prompt_choice("Pick One", list)
