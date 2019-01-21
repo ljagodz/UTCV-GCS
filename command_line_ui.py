@@ -1,5 +1,8 @@
 from cloud_storage import *
 from calculation import *
+from data_collection import *
+import datetime
+import os
 
 class UI:
     exit = False
@@ -15,7 +18,7 @@ class UI:
                            "\t(DELETE): Delete a test from the database",
                            "\t(RUN): Run an existing test",
                            "\t(EXIT): Exit program"],
-                          ["LIST", "NEW", "DELETE", "EXIT"])
+                          ["VIEW", "NEW", "DELETE", "RUN", "EXIT"])
 
             if i == 0: self.view_test()
             elif i == 1: self.new_test()
@@ -30,7 +33,7 @@ class UI:
         while not decided:
             choices = "\n"
             for i in range(len(list)):
-                choices = choices + list[i]
+                choices = choices + list[i] + "\n"
 
             decision = input(question + " " + choices)
 
@@ -52,7 +55,7 @@ class UI:
                 print("\nUnrecognized input \"" + decision + "\"\n")
 
     def list_tests(self):
-        self.tests  = get_blobs_with_prefix(self.bucket_name, "/description", delimiter="/")
+        self.tests  = get_blobs_with_prefix(self.bucket_name, "/discrete", delimiter="/")
         print('Existing Tests:\n')
         i = 0
         for test in self.tests:
@@ -66,8 +69,8 @@ class UI:
             if test_name is "RETURN": return
             elif test_name not in [test.name for test in self.tests]:
                 # Path to description files
-                local = '/localstorage/description/' + test_name + '.txt'
-                cloud = '/description/' + test_name
+                local = '/local/discrete/' + test_name + '.txt'
+                cloud = '/discrete/' + test_name
 
                 # Create txt description file
                 open(local, 'a').close()
@@ -94,6 +97,21 @@ class UI:
         # NOT IMPLEMENTED YET LOL #
         print("I have not programmed this path yet")
 
+    def run_test(self):
+        i = self.choose_test("Pick a test to run")
+
+        chemical_amount = input("Enter chemical amount: ")
+        chemical_amount = float(chemical_amount)
+        # SPECIFY THE DIFFERENCES OF THE TEST SOMEHOW #
+        data = collect_data(chemical_amount)
+
+        local_discrete = '/local/discrete/' + self.tests[i].name + '.csv'
+        local_continous = '/local/' + self.tests[i].name + '/' + datetime.datetime.now() + '.csv'
+        cloud_discrete = '/discrete/' + self.tests[i].name + '.csv'
+        cloud_continous = '/' + self.tests[i].name + '.csv'
+
+
+
 
 
     def choose_test(self, question):
@@ -102,4 +120,30 @@ class UI:
         options = ["\t(" + str(i) + ") " + self.tests[i].name for i in range(len(self.tests))]
         code = [str(i) for i in range(len(self.tests))]
         return self.prompt_choice(question, options, code)
+
+    def download_test(self, i):
+        #Downloads test to local folder#
+        local = '/local/discrete/' + self.tests[i].name + '.csv'
+        cloud = '/discrete/' + self.tests[i].name + '.csv'
+
+
+        download_blob(self.bucket_name, cloud, local)
+
+    def download_data(self, test_id, ):
+        # Needs implementation #
+
+    def append_run(self, i, test):
+        #Appends a single row to single CSV #
+        local = '/local/discrete/' + self.tests[i].name + '.csv'
+        with open(local, 'a') as file:
+            file.write(test)
+
+    def replace_test(self, i):
+        #Delete remote file and upload local file#
+        local = '/local/discrete/' + self.tests[i].name + '.csv'
+        cloud = '/discrete/' + self.tests[i].name + '.csv'
+
+        delete_blob(self.bucket_name, cloud)
+        upload_blob(self.bucket_name, local, cloud)
+
 
