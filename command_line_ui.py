@@ -110,6 +110,10 @@ class UI:
         cloud_discrete = '/discrete/' + self.tests[i].name + '.csv'
         cloud_continous = '/' + self.tests[i].name + '.csv'
 
+        self.update_local(i)
+
+        append_run(self, i, test)
+
 
 
 
@@ -121,11 +125,13 @@ class UI:
         code = [str(i) for i in range(len(self.tests))]
         return self.prompt_choice(question, options, code)
 
-    def download_test(self, i):
-        #Downloads test to local folder#
+    def update_local(self, i):
+        #Checks if local file exists, if it does deletes it and downloads cloud copy#
         local = '/local/discrete/' + self.tests[i].name + '.csv'
         cloud = '/discrete/' + self.tests[i].name + '.csv'
 
+        if os.path.isfile(local):
+            os.remove(local)
 
         download_blob(self.bucket_name, cloud, local)
 
@@ -138,7 +144,7 @@ class UI:
         with open(local, 'a') as file:
             file.write(test)
 
-    def replace_test(self, i):
+    def update_cloud(self, i):
         #Delete remote file and upload local file#
         local = '/local/discrete/' + self.tests[i].name + '.csv'
         cloud = '/discrete/' + self.tests[i].name + '.csv'
